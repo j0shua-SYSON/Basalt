@@ -162,7 +162,7 @@ actor LlamaEngine: InferenceServing {
         AsyncThrowingStream { continuation in
             let task = Task {
                 do {
-                    try await self.runGeneration(
+                    try self.runGeneration(
                         messages: messages,
                         attachments: attachments,
                         settings: settings,
@@ -379,7 +379,7 @@ actor LlamaEngine: InferenceServing {
                 add_special: true,
                 parse_special: true
             )
-            return bitmapPointers.withUnsafeBufferPointer { bitmaps in
+            return bitmapPointers.withUnsafeMutableBufferPointer { bitmaps in
                 mtmd_tokenize(
                     multimodalContext,
                     chunks,
@@ -488,7 +488,7 @@ actor LlamaEngine: InferenceServing {
             contents.forEach { free($0) }
         }
 
-        var cMessages = zip(roles, contents).map { role, content in
+        let cMessages = zip(roles, contents).map { role, content in
             llama_chat_message(role: role, content: content)
         }
         var buffer = [CChar](
