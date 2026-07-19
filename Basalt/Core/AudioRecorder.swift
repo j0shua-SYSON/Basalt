@@ -29,7 +29,7 @@ final class AudioRecorder: NSObject, ObservableObject, AVAudioRecorderDelegate {
     }
 
     private func requestPermissionAndStart(onError: @escaping (Error) -> Void) {
-        AVAudioSession.sharedInstance().requestRecordPermission { [weak self] granted in
+        AVAudioApplication.requestRecordPermission { [weak self] granted in
             Task { @MainActor in
                 guard let self else { return }
                 guard granted else {
@@ -97,4 +97,3 @@ private enum AudioRecorderError: LocalizedError {
         }
     }
 }
-

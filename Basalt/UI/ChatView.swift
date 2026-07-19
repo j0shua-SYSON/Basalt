@@ -54,6 +54,7 @@ struct ChatView: View {
 
     @ViewBuilder
     private func transcript(_ conversation: Conversation) -> some View {
+        let lastMessageID = conversation.messages.last?.id
         ScrollViewReader { proxy in
             ScrollView {
                 if conversation.messages.isEmpty {
@@ -62,17 +63,7 @@ struct ChatView: View {
                 } else {
                     LazyVStack(spacing: 24) {
                         ForEach(conversation.messages) { message in
-                            MessageRow(
-                                message: message,
-                                isStreaming: appModel.isGenerating
-                                    && message.id == conversation.messages.last?.id
-                                    && message.role == .assistant,
-                                retry: message.id == conversation.messages.last?.id
-                                    && message.role == .assistant
-                                    ? appModel.retryLastResponse
-                                    : nil
-                            )
-                            .id(message.id)
+                            messageRow(message, lastMessageID: lastMessageID)
                         }
 
                         if appModel.isSearching {
@@ -99,6 +90,22 @@ struct ChatView: View {
                     proxy.scrollTo("conversation-bottom", anchor: .bottom)
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private func messageRow(_ message: ChatMessage, lastMessageID: UUID?) -> some View {
+        let isLastAssistant = message.role == .assistant && message.id == lastMessageID
+        if isLastAssistant {
+            MessageRow(
+                message: message,
+                isStreaming: appModel.isGenerating,
+                retry: appModel.retryLastResponse
+            )
+            .id(message.id)
+        } else {
+            MessageRow(message: message, isStreaming: false, retry: nil)
+                .id(message.id)
         }
     }
 }
@@ -237,4 +244,3 @@ private struct ModelStatusBar: View {
         }
     }
 }
-
