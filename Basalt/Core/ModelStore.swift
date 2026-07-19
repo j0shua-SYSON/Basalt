@@ -96,7 +96,10 @@ actor ModelStore {
 
         let preferredName = suggestedName ?? source.deletingPathExtension().lastPathComponent
         let displayName = Self.cleanedDisplayName(preferredName)
-        let destinationName = uniqueFileName(for: source.lastPathComponent, displayName: displayName)
+        let destinationName = uniqueFileName(
+            for: suggestedName ?? source.lastPathComponent,
+            displayName: displayName
+        )
         let destination = directories.models.appendingPathComponent(destinationName)
 
         progress(ImportProgress(
@@ -275,7 +278,8 @@ actor ModelStore {
     private func uniqueFileName(for original: String, displayName: String) -> String {
         let rawExtension = URL(fileURLWithPath: original).pathExtension.lowercased()
         let fileExtension = rawExtension == "gguf" ? rawExtension : "gguf"
-        let base = Self.safeFileComponent(displayName)
+        let originalBase = URL(fileURLWithPath: original).deletingPathExtension().lastPathComponent
+        let base = Self.safeFileComponent(originalBase.isEmpty ? displayName : originalBase)
         var candidate = "\(base).\(fileExtension)"
         var suffix = 2
         while fileManager.fileExists(atPath: directories.models.appendingPathComponent(candidate).path) {

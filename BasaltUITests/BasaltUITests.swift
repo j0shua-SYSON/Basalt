@@ -11,17 +11,11 @@ final class BasaltUITests: XCTestCase {
     }
 
     func testVisualWalkthrough() throws {
-        XCTAssertTrue(app.otherElements["chat-view"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.buttons["model-selector"].waitForExistence(timeout: 10))
         attachScreenshot(named: "01-chat")
 
-        let models = app.buttons["models-navigation"].firstMatch
-        if models.waitForExistence(timeout: 3) {
-            models.tap()
-        } else {
-            app.navigationBars.buttons.firstMatch.tap()
-            app.buttons["models-navigation"].firstMatch.tap()
-        }
-        XCTAssertTrue(app.otherElements["model-library"].waitForExistence(timeout: 5))
+        tapSidebarItem("models-navigation")
+        XCTAssertTrue(app.navigationBars["Models"].waitForExistence(timeout: 5))
         attachScreenshot(named: "02-model-library")
 
         app.buttons["library-add-model"].tap()
@@ -29,12 +23,20 @@ final class BasaltUITests: XCTestCase {
         attachScreenshot(named: "03-import-model")
         app.buttons["Close"].tap()
 
-        let settings = app.buttons["settings-navigation"].firstMatch
-        if settings.waitForExistence(timeout: 2) {
-            settings.tap()
-            XCTAssertTrue(app.otherElements["settings-view"].waitForExistence(timeout: 5))
-            attachScreenshot(named: "04-settings")
+        tapSidebarItem("settings-navigation")
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
+        attachScreenshot(named: "04-settings")
+    }
+
+    private func tapSidebarItem(_ identifier: String) {
+        let item = app.buttons[identifier].firstMatch
+        if !item.waitForExistence(timeout: 2) {
+            let sidebar = app.buttons["Show Sidebar"].firstMatch
+            XCTAssertTrue(sidebar.waitForExistence(timeout: 3))
+            sidebar.tap()
         }
+        XCTAssertTrue(item.waitForExistence(timeout: 3))
+        item.tap()
     }
 
     private func attachScreenshot(named name: String) {

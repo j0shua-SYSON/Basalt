@@ -35,7 +35,6 @@ struct ChatView: View {
             .presentationDetents([.large])
         }
         .navigationBarTitleDisplayMode(.inline)
-        .accessibilityIdentifier("chat-view")
     }
 
     private var noModel: some View {

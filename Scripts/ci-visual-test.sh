@@ -38,8 +38,13 @@ xcodebuild \
   -derivedDataPath "$REPO_ROOT/DerivedData" \
   build-for-testing
 
-xcrun simctl io "$IPAD_ID" recordVideo --codec=h264 "$VIDEO" >/dev/null 2>&1 &
+xcrun simctl io "$IPAD_ID" recordVideo "$VIDEO" >"$ARTIFACTS/ipad-recording.log" 2>&1 &
 VIDEO_PID=$!
+sleep 2
+if ! kill -0 "$VIDEO_PID" 2>/dev/null; then
+  echo "The standalone simulator recorder exited early; XCTest attachments will still be exported." >&2
+  cat "$ARTIFACTS/ipad-recording.log" >&2 || true
+fi
 
 stop_recording() {
   if kill -0 "$VIDEO_PID" 2>/dev/null; then
@@ -65,7 +70,6 @@ trap - EXIT
 xcrun xcresulttool export attachments \
   --path "$RESULT_BUNDLE" \
   --output-path "$ARTIFACTS/xctest-attachments" 2>/dev/null || true
-xcrun simctl io "$IPAD_ID" screenshot "$ARTIFACTS/ipad-final.png"
 
 APP_PATH="$REPO_ROOT/DerivedData/Build/Products/Debug-iphonesimulator/Basalt.app"
 if [[ -d "$APP_PATH" ]]; then

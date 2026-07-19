@@ -656,7 +656,8 @@ final class AppModel: ObservableObject {
                 ChatMessage(role: .user, text: "Why is on-device AI useful on iPad?", sources: sources),
                 ChatMessage(
                     role: .assistant,
-                    text: "On-device AI keeps prompts close, works without a connection, and avoids round-trip latency. Apple silicon can accelerate the workload locally [1], while llama.cpp provides a portable GGUF runtime with Metal support [2]."
+                    text: "On-device AI keeps prompts close, works without a connection, and avoids round-trip latency. Apple silicon can accelerate the workload locally [1], while llama.cpp provides a portable GGUF runtime with Metal support [2].",
+                    sources: sources
                 )
             ]
         )

@@ -45,7 +45,6 @@ struct ModelLibraryView: View {
             ModelInspectorSheet(modelID: model.id)
                 .environmentObject(appModel)
         }
-        .accessibilityIdentifier("model-library")
     }
 }
 
