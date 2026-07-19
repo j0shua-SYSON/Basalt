@@ -66,7 +66,10 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.joshuasyson.BasaltTests
+        PRODUCT_MODULE_NAME: BasaltTests
+        PRODUCT_NAME: BasaltTests
         GENERATE_INFOPLIST_FILE: YES
+        SWIFT_OPTIMIZATION_LEVEL: -Onone
     dependencies:
       - target: Basalt
 
@@ -78,7 +81,10 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.joshuasyson.BasaltUITests
+        PRODUCT_MODULE_NAME: BasaltUITests
+        PRODUCT_NAME: BasaltUITests
         GENERATE_INFOPLIST_FILE: YES
+        SWIFT_OPTIMIZATION_LEVEL: -Onone
         TEST_TARGET_NAME: Basalt
     dependencies:
       - target: Basalt
