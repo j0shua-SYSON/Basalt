@@ -21,6 +21,12 @@ struct ComposerView: View {
 
     private var hasProjector: Bool { appModel.selectedModel?.projectorFileName != nil }
 
+    private var attachmentAccessibilityLabel: String {
+        if !hasProjector { return "Attach a multimodal projector to add media" }
+        if capabilities == nil { return "Load the model to inspect media support" }
+        return "Add supported media"
+    }
+
     var body: some View {
         VStack(spacing: 9) {
             if !appModel.pendingAttachments.isEmpty {
@@ -171,33 +177,48 @@ struct ComposerView: View {
 
     private var attachmentMenu: some View {
         Menu {
-            PhotosPicker(selection: $photoItem, matching: .images) {
-                Label("Photo library", systemImage: "photo.on.rectangle")
-            }
-            Button {
-                requestedKind = .image
-                isFileImporterPresented = true
-            } label: {
-                Label("Image from Files", systemImage: "photo")
-            }
-            Button {
-                requestedKind = .audio
-                isFileImporterPresented = true
-            } label: {
-                Label("Audio from Files", systemImage: "waveform")
-            }
-            Divider()
-            Button {
-                audioRecorder.toggle { url in
-                    appModel.addAttachmentFile(url, kind: .audio)
-                } onError: { error in
-                    appModel.notice = AppNotice(title: "Audio recording unavailable", message: error.localizedDescription)
+            if capabilities == nil {
+                Button {
+                    appModel.loadSelectedModel()
+                } label: {
+                    Label("Load to inspect capabilities", systemImage: "bolt")
                 }
-            } label: {
-                Label(
-                    audioRecorder.isRecording ? "Finish recording" : "Record audio",
-                    systemImage: audioRecorder.isRecording ? "stop.circle" : "mic"
-                )
+            } else {
+                if capabilities?.supportsVision == true {
+                    PhotosPicker(selection: $photoItem, matching: .images) {
+                        Label("Photo library", systemImage: "photo.on.rectangle")
+                    }
+                    Button {
+                        requestedKind = .image
+                        isFileImporterPresented = true
+                    } label: {
+                        Label("Image from Files", systemImage: "photo")
+                    }
+                }
+                if capabilities?.supportsAudio == true {
+                    Button {
+                        requestedKind = .audio
+                        isFileImporterPresented = true
+                    } label: {
+                        Label("Audio from Files", systemImage: "waveform")
+                    }
+                    Button {
+                        audioRecorder.toggle { url in
+                            appModel.addAttachmentFile(url, kind: .audio)
+                        } onError: { error in
+                            appModel.notice = AppNotice(title: "Audio recording unavailable", message: error.localizedDescription)
+                        }
+                    } label: {
+                        Label(
+                            audioRecorder.isRecording ? "Finish recording" : "Record audio",
+                            systemImage: audioRecorder.isRecording ? "stop.circle" : "mic"
+                        )
+                    }
+                }
+                if capabilities?.supportsVision != true,
+                   capabilities?.supportsAudio != true {
+                    Text("This projector exposes no supported media")
+                }
             }
         } label: {
             Image(systemName: audioRecorder.isRecording ? "waveform.circle.fill" : "plus.circle")
@@ -206,7 +227,7 @@ struct ComposerView: View {
                 .frame(width: 34, height: 34)
         }
         .disabled(!hasProjector || appModel.isGenerating)
-        .accessibilityLabel(hasProjector ? "Add image or audio" : "Attach a multimodal projector to add media")
+        .accessibilityLabel(attachmentAccessibilityLabel)
         .accessibilityIdentifier("attachment-menu")
     }
 
@@ -220,4 +241,3 @@ struct ComposerView: View {
         draft = ""
     }
 }
-

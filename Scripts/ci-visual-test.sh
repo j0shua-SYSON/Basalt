@@ -30,6 +30,14 @@ xcrun simctl boot "$IPAD_ID" 2>/dev/null || true
 xcrun simctl bootstatus "$IPAD_ID" -b
 
 VIDEO="$ARTIFACTS/ipad-walkthrough.mp4"
+
+xcodebuild \
+  -project "$REPO_ROOT/Basalt.xcodeproj" \
+  -scheme Basalt \
+  -destination "platform=iOS Simulator,id=$IPAD_ID" \
+  -derivedDataPath "$REPO_ROOT/DerivedData" \
+  build-for-testing
+
 xcrun simctl io "$IPAD_ID" recordVideo --codec=h264 "$VIDEO" >/dev/null 2>&1 &
 VIDEO_PID=$!
 
@@ -48,13 +56,15 @@ xcodebuild \
   -destination "platform=iOS Simulator,id=$IPAD_ID" \
   -derivedDataPath "$REPO_ROOT/DerivedData" \
   -resultBundlePath "$RESULT_BUNDLE" \
-  CODE_SIGNING_ALLOWED=NO \
-  test
+  test-without-building
 TEST_STATUS=$?
 set -e
 
 stop_recording
 trap - EXIT
+xcrun xcresulttool export attachments \
+  --path "$RESULT_BUNDLE" \
+  --output-path "$ARTIFACTS/xctest-attachments" 2>/dev/null || true
 xcrun simctl io "$IPAD_ID" screenshot "$ARTIFACTS/ipad-final.png"
 
 APP_PATH="$REPO_ROOT/DerivedData/Build/Products/Debug-iphonesimulator/Basalt.app"
@@ -62,10 +72,13 @@ if [[ -d "$APP_PATH" ]]; then
   xcrun simctl boot "$IPHONE_ID" 2>/dev/null || true
   xcrun simctl bootstatus "$IPHONE_ID" -b
   xcrun simctl install "$IPHONE_ID" "$APP_PATH"
-  xcrun simctl launch "$IPHONE_ID" com.joshuasyson.Basalt --ui-testing
+  xcrun simctl launch \
+    --terminate-running-process \
+    --stdout="$ARTIFACTS/iphone-stdout.log" \
+    --stderr="$ARTIFACTS/iphone-stderr.log" \
+    "$IPHONE_ID" com.joshuasyson.Basalt --ui-testing
   sleep 3
   xcrun simctl io "$IPHONE_ID" screenshot "$ARTIFACTS/iphone-chat.png"
 fi
 
 exit "$TEST_STATUS"
-

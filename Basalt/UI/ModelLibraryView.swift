@@ -120,8 +120,6 @@ private struct ModelCard: View {
         }
         .padding(18)
         .basaltCard()
-        .contentShape(RoundedRectangle(cornerRadius: BasaltTheme.cornerRadius))
-        .onTapGesture(perform: inspect)
     }
 }
 
@@ -307,7 +305,13 @@ private struct ProjectorImportSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { dismiss() }.disabled(appModel.isImporting)
+                    Button(appModel.isImporting ? "Cancel" : "Close") {
+                        if appModel.isImporting {
+                            appModel.cancelImport()
+                        } else {
+                            dismiss()
+                        }
+                    }
                 }
             }
             .fileImporter(

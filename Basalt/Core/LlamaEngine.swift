@@ -645,27 +645,10 @@ actor LlamaEngine: InferenceServing {
         let template = metadata["tokenizer.chat_template"]
             ?? llama_model_chat_template(model, nil).map(String.init(cString:))
             ?? ""
-        let identity = ([
-            metadata["general.name"],
-            metadata["general.architecture"],
-            metadata["general.basename"],
-            template
-        ].compactMap { $0 }.joined(separator: " ")).lowercased()
-
-        let control: ThinkingControl
-        if identity.contains("reasoning_effort") {
-            control = .reasoningEffort
-        } else if identity.contains("qwen3") || identity.contains("/no_think") {
-            control = .qwenSlashCommand
-        } else if identity.contains("/nothink") || identity.contains("glm-4") {
-            control = .glmSlashCommand
-        } else if identity.contains("enable_thinking")
-                    || identity.contains("thinking_budget")
-                    || identity.contains("<think>") {
-            control = .closingTag
-        } else {
-            control = .none
-        }
+        let control = ModelCapabilityDetector.thinkingControl(
+            metadata: metadata,
+            chatTemplate: template
+        )
         return ModelCapabilities(thinkingControl: control)
     }
 

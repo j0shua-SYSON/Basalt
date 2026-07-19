@@ -202,7 +202,12 @@ actor ModelStore {
             suffix += 1
         }
         let destination = directories.models.appendingPathComponent(name)
-        try copyFile(from: source, to: destination, totalBytes: byteCount, progress: progress)
+        do {
+            try copyFile(from: source, to: destination, totalBytes: byteCount, progress: progress)
+        } catch {
+            try? fileManager.removeItem(at: destination)
+            throw error
+        }
 
         var catalog = try models()
         guard let index = catalog.firstIndex(where: { $0.id == record.id }) else {
@@ -254,6 +259,7 @@ actor ModelStore {
         let chunkSize = 4 * 1_024 * 1_024
         var completed: Int64 = 0
         while let chunk = try input.read(upToCount: chunkSize), !chunk.isEmpty {
+            try Task.checkCancellation()
             try output.write(contentsOf: chunk)
             completed += Int64(chunk.count)
             progress(ImportProgress(

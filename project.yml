@@ -45,6 +45,7 @@ targets:
         SWIFT_OPTIMIZATION_LEVEL: -Onone
       configs:
         Debug:
+          ENABLE_TESTABILITY: YES
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
         Release:
           SWIFT_COMPILATION_MODE: wholemodule

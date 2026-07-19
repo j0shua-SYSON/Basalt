@@ -129,6 +129,10 @@ private final class DownloadOperation: NSObject, URLSessionDownloadDelegate, @un
         try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
                 lock.withLock {
+                    guard !completed else {
+                        continuation.resume(throwing: CancellationError())
+                        return
+                    }
                     self.continuation = continuation
                     let configuration = URLSessionConfiguration.ephemeral
                     configuration.waitsForConnectivity = true

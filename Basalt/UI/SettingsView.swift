@@ -98,7 +98,7 @@ private struct GenerationSettingsSections: View {
                         .monospacedDigit().foregroundStyle(.secondary)
                 }
                 Slider(value: settings.temperature, in: 0...2, step: 0.05)
-                    .onChange(of: appModel.generationSettings.temperature) { _, _ in markCustom() }
+                    .onChange(of: appModel.generationSettings.temperature) { _, _ in synchronizeSamplingPreset() }
             }
 
             Stepper(
@@ -141,7 +141,7 @@ private struct GenerationSettingsSections: View {
         Section("Advanced sampling") {
             valueSlider("Top P", value: settings.topP, range: 0...1, step: 0.01)
             Stepper("Top K · \(appModel.generationSettings.topK)", value: settings.topK, in: 0...200)
-                .onChange(of: appModel.generationSettings.topK) { _, _ in markCustom() }
+                .onChange(of: appModel.generationSettings.topK) { _, _ in synchronizeSamplingPreset() }
             valueSlider("Min P", value: settings.minP, range: 0...1, step: 0.01)
             valueSlider("Typical P", value: settings.typicalP, range: 0...1, step: 0.01)
             valueSlider("Repeat penalty", value: settings.repeatPenalty, range: 0.8...1.5, step: 0.01)
@@ -151,6 +151,9 @@ private struct GenerationSettingsSections: View {
                 in: 0...4_096,
                 step: 16
             )
+            .onChange(of: appModel.generationSettings.repeatLastTokens) { _, _ in
+                synchronizeSamplingPreset()
+            }
             valueSlider("Frequency penalty", value: settings.frequencyPenalty, range: -2...2, step: 0.05)
             valueSlider("Presence penalty", value: settings.presencePenalty, range: -2...2, step: 0.05)
             TextField("Seed · blank is random", text: seedBinding)
@@ -207,7 +210,7 @@ private struct GenerationSettingsSections: View {
                     .monospacedDigit().foregroundStyle(.secondary)
             }
             Slider(value: value, in: range, step: step)
-                .onChange(of: value.wrappedValue) { _, _ in markCustom() }
+                .onChange(of: value.wrappedValue) { _, _ in synchronizeSamplingPreset() }
         }
     }
 
@@ -229,9 +232,12 @@ private struct GenerationSettingsSections: View {
         )
     }
 
-    private func markCustom() {
-        if appModel.generationSettings.samplingPreset != .custom {
-            appModel.generationSettings.samplingPreset = .custom
+    private func synchronizeSamplingPreset() {
+        let settings = appModel.generationSettings
+        let detected = [SamplingPreset.precise, .balanced, .creative]
+            .first(where: settings.matches) ?? .custom
+        if settings.samplingPreset != detected {
+            appModel.generationSettings.samplingPreset = detected
         }
     }
 }

@@ -169,7 +169,16 @@ struct GenerationSettings: Codable, Equatable, Sendable {
     static let `default` = GenerationSettings()
 
     mutating func apply(_ preset: SamplingPreset) {
-        samplingPreset = preset
+        guard preset != .custom else {
+            samplingPreset = .custom
+            return
+        }
+
+        typicalP = 1.0
+        repeatPenalty = 1.1
+        repeatLastTokens = 64
+        frequencyPenalty = 0
+        presencePenalty = 0
         switch preset {
         case .precise:
             temperature = 0.2
@@ -189,6 +198,22 @@ struct GenerationSettings: Codable, Equatable, Sendable {
         case .custom:
             break
         }
+        samplingPreset = preset
+    }
+
+    func matches(_ preset: SamplingPreset) -> Bool {
+        guard preset != .custom else { return false }
+        var candidate = GenerationSettings.default
+        candidate.apply(preset)
+        return temperature == candidate.temperature
+            && topP == candidate.topP
+            && topK == candidate.topK
+            && minP == candidate.minP
+            && typicalP == candidate.typicalP
+            && repeatPenalty == candidate.repeatPenalty
+            && repeatLastTokens == candidate.repeatLastTokens
+            && frequencyPenalty == candidate.frequencyPenalty
+            && presencePenalty == candidate.presencePenalty
     }
 }
 

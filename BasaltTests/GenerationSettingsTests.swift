@@ -11,6 +11,10 @@ final class GenerationSettingsTests: XCTestCase {
         settings.apply(.creative)
         XCTAssertEqual(settings.temperature, 1.0)
         XCTAssertEqual(settings.topK, 64)
+        XCTAssertTrue(settings.matches(.creative))
+
+        settings.repeatPenalty = 1.25
+        XCTAssertFalse(settings.matches(.creative))
     }
 
     func testQuantizationDetectionUsesLongestSpecificNamesFirst() {
@@ -44,4 +48,3 @@ final class GenerationSettingsTests: XCTestCase {
         XCTAssertNil(message.sources)
     }
 }
-

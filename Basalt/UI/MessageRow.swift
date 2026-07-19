@@ -48,7 +48,9 @@ struct MessageRow: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                if let sources = message.sources, !sources.isEmpty {
+                if message.role == .assistant,
+                   let sources = message.sources,
+                   !sources.isEmpty {
                     SourceStrip(sources: sources)
                 }
 

@@ -56,8 +56,13 @@ struct ImportModelSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { dismiss() }
-                        .disabled(appModel.isImporting)
+                    Button(appModel.isImporting ? "Cancel" : "Close") {
+                        if appModel.isImporting {
+                            appModel.cancelImport()
+                        } else {
+                            dismiss()
+                        }
+                    }
                 }
             }
             .fileImporter(
@@ -185,4 +190,3 @@ struct ImportProgressView: View {
         .accessibilityElement(children: .combine)
     }
 }
-
