@@ -6,7 +6,7 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            Section("Web search") {
+            Section {
                 Picker("Provider", selection: $webSettings.provider) {
                     ForEach(WebSearchProvider.allCases) { provider in
                         Text(provider.label).tag(provider)
@@ -27,6 +27,8 @@ struct SettingsView: View {
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                 }
+            } header: {
+                Text("Web search")
             } footer: {
                 Text("Web search is opt-in per message. Basalt sends the query to this provider, then gives result snippets to the local model. Prompts and generated text are not sent.")
             }
