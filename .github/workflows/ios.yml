@@ -1,0 +1,65 @@
+name: iOS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-capture:
+    name: Build, test, and capture
+    runs-on: macos-15
+    timeout-minutes: 50
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Cache pinned downloads
+        uses: actions/cache@v4
+        with:
+          path: .build-cache/downloads
+          key: basalt-apple-dependencies-b10068-xcodegen-2.46.0
+
+      - name: Show Apple toolchain
+        run: |
+          xcodebuild -version
+          xcrun simctl list runtimes
+
+      - name: Bootstrap repository-local dependencies
+        run: |
+          chmod +x Scripts/*.sh
+          ./Scripts/bootstrap.sh
+
+      - name: Build iPhone and iPad app
+        run: ./Scripts/build.sh
+
+      - name: Test and record simulator walkthrough
+        run: ./Scripts/ci-visual-test.sh
+
+      - name: Upload simulator evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: basalt-simulator-evidence
+          path: VisualArtifacts/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload failing test result
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: basalt-test-result
+          path: TestResults/Basalt.xcresult
+          if-no-files-found: warn
+          retention-days: 7
+

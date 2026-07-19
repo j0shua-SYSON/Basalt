@@ -1,0 +1,101 @@
+name: Basalt
+
+options:
+  bundleIdPrefix: com.joshuasyson
+  createIntermediateGroups: true
+  deploymentTarget:
+    iOS: "17.0"
+  developmentLanguage: en
+  xcodeVersion: "16.4"
+
+settings:
+  base:
+    CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: YES
+    CLANG_CXX_LANGUAGE_STANDARD: gnu++20
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    SWIFT_STRICT_CONCURRENCY: targeted
+    SWIFT_VERSION: "5.10"
+
+targets:
+  Basalt:
+    type: application
+    platform: iOS
+    sources:
+      - path: Basalt
+    info:
+      path: Config/Info.plist
+    entitlements:
+      path: Config/Basalt.entitlements
+    settings:
+      base:
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_STYLE: Automatic
+        CURRENT_PROJECT_VERSION: 1
+        DEVELOPMENT_TEAM: ""
+        ENABLE_PREVIEWS: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Basalt
+        MARKETING_VERSION: 0.1.0
+        PRODUCT_BUNDLE_IDENTIFIER: com.joshuasyson.Basalt
+        PRODUCT_NAME: Basalt
+        SUPPORTS_MACCATALYST: NO
+        SWIFT_EMIT_LOC_STRINGS: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+      configs:
+        Debug:
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+        Release:
+          SWIFT_COMPILATION_MODE: wholemodule
+    dependencies:
+      - framework: Vendor/llama.xcframework
+        embed: true
+        codeSign: true
+      - sdk: Accelerate.framework
+      - sdk: AVFoundation.framework
+      - sdk: Metal.framework
+      - sdk: PhotosUI.framework
+      - sdk: Security.framework
+
+  BasaltTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: BasaltTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.joshuasyson.BasaltTests
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - target: Basalt
+
+  BasaltUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: BasaltUITests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.joshuasyson.BasaltUITests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Basalt
+    dependencies:
+      - target: Basalt
+
+schemes:
+  Basalt:
+    build:
+      targets:
+        Basalt: all
+        BasaltTests: [test]
+        BasaltUITests: [test]
+    test:
+      gatherCoverageData: true
+      targets:
+        - name: BasaltTests
+          parallelizable: true
+        - name: BasaltUITests
+          parallelizable: false
+    run:
+      config: Debug
+    archive:
+      config: Release

@@ -1,0 +1,27 @@
+# Apple build products (kept workspace-local by Basalt scripts)
+.build-cache/
+.build-tools/
+DerivedData/
+TestResults/
+VisualArtifacts/
+*.xcresult
+
+# Generated project
+Basalt.xcodeproj/
+
+# Downloaded llama.cpp binary
+Vendor/*
+!Vendor/README.md
+
+# Xcode user state
+*.xcuserstate
+xcuserdata/
+*.xccheckout
+*.moved-aside
+
+# macOS / editors
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
